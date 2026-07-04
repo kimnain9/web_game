@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Hacking Game</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+      background:
+        radial-gradient(circle at 18% 30%, rgba(116,255,184,0.12), transparent 34%),
+        radial-gradient(circle at 82% 42%, rgba(116,255,184,0.09), transparent 34%),
+        linear-gradient(135deg, #071015 0%, #0b1519 48%, #071015 100%);
+      color: #f4fff9;
+      overflow: hidden;
+    }
+
+    button {
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .page {
+      width: 100vw;
+      height: 100vh;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+
+    .outer-code {
+      position: absolute;
+      z-index: 1;
+      padding: 8px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(116,255,184,0.18);
+      background: rgba(6, 14, 18, 0.34);
+      color: rgba(190,255,222,0.46);
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      letter-spacing: 0.45px;
+      white-space: nowrap;
+      pointer-events: none;
+      text-shadow: 0 0 10px rgba(116,255,184,0.24);
+    }
+
+    .outer-code-1 {
+      top: 11%;
+      left: 7%;
+      animation: outerCodeFloat1 8s ease-in-out infinite;
+    }
+
+    .outer-code-2 {
+      top: 20%;
+      right: 7%;
+      animation: outerCodeFloat2 9s ease-in-out infinite;
+    }
+
+    .outer-code-3 {
+      bottom: 9%;
+      left: 10%;
+      animation: outerCodeFloat3 10s ease-in-out infinite;
+    }
+
+    @keyframes outerCodeFloat1 {
+      0%, 100% {
+        transform: translate(0, 0);
+        opacity: 0.42;
+      }
+      50% {
+        transform: translate(18px, 12px);
+        opacity: 0.7;
+      }
+    }
+
+    @keyframes outerCodeFloat2 {
+      0%, 100% {
+        transform: translate(0, 0);
+        opacity: 0.34;
+      }
+      50% {
+        transform: translate(-20px, 14px);
+        opacity: 0.62;
+      }
+    }
+
+    @keyframes outerCodeFloat3 {
+      0%, 100% {
+        transform: translate(0, 0);
+        opacity: 0.28;
+      }
+      50% {
+        transform: translate(20px, -14px);
+        opacity: 0.52;
+      }
+    }
+
+
+    .game-frame {
+      width: min(1240px, calc((100vh - 32px) * 16 / 9), calc(100vw - 32px));
+      height: min(700px, calc(100vh - 32px), calc((100vw - 32px) * 9 / 16));
+      border: 3px solid #74ffb8;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(116, 255, 184, 0.08), rgba(0,0,0,0.08)),
+        #0b1117;
+      box-shadow:
+        0 0 0 6px rgba(116, 255, 184, 0.08),
+        0 0 38px rgba(116, 255, 184, 0.22),
+        0 28px 70px rgba(0,0,0,0.58);
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+
+    .page {
+      position: relative;
+      overflow: hidden;
+    }
+
+
+
+    .top-hud {
+      height: 68px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 22px;
+      padding: 0 24px;
+      border-bottom: 2px solid rgba(116, 255, 184, 0.24);
+      background: rgba(5, 10, 16, 0.8);
+    }
+
+    .game-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .game-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #74ffb8, #ffd166);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 20px rgba(116,255,184,0.45);
+      position: relative;
+    }
+
+    .shield-mark {
+      width: 20px;
+      height: 24px;
+      display: block;
+      background: #091015;
+      clip-path: polygon(50% 0%, 88% 14%, 82% 63%, 50% 100%, 18% 63%, 12% 14%);
+      position: relative;
+    }
+
+    .shield-mark::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 5px;
+      width: 4px;
+      height: 12px;
+      border-radius: 999px;
+      background: #74ffb8;
+      box-shadow: 0 0 0 3px rgba(116,255,184,0.22);
+    }
+
+    .title-text {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .game-title h1 {
+      font-size: 27px;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .game-title p {
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(116,255,184,0.18);
+      background: rgba(116,255,184,0.055);
+      font-size: 12px;
+      color: #bff7d9;
+      white-space: nowrap;
+      margin-top: 0;
+    }
+
+    .hud-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .coin-box,
+    .level-box {
+      padding: 9px 12px;
+      border: 1px solid rgba(116,255,184,0.3);
+      border-radius: 13px;
+      background: rgba(116,255,184,0.08);
+      font-weight: 800;
+      color: #dfffea;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .reset-btn,
+    .title-btn {
+      padding: 10px 13px;
+      border-radius: 13px;
+      color: #101820;
+      font-size: 12px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd166, #74ffb8);
+    }
+
+    .title-btn {
+      background: linear-gradient(135deg, #74ffb8, #2bd4ff);
+    }
+
+    .start-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(rgba(0,0,0,0.38), rgba(0,0,0,0.7)),
+        radial-gradient(circle at center, rgba(116,255,184,0.18), transparent 48%),
+        #05080d;
+      overflow: hidden;
+    }
+
+    .start-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 0%, rgba(116,255,184,0.06) 50%, transparent 100%),
+        repeating-linear-gradient(
+          180deg,
+          rgba(255,255,255,0.035) 0px,
+          rgba(255,255,255,0.035) 1px,
+          transparent 1px,
+          transparent 7px
+        );
+      opacity: 0.7;
+      animation: bgMove 7s linear infinite;
+      pointer-events: none;
+    }
+
+    .start-screen::after {
+      content: "";
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(116,255,184,0.2), transparent 62%);
+      animation: pulseOrb 3.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 0;
+      top: -20%;
+      width: 100%;
+      height: 90px;
+      background: linear-gradient(
+        180deg,
+        transparent,
+        rgba(116,255,184,0.12),
+        transparent
+      );
+      animation: scanDown 4.2s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .floating-code {
+      position: absolute;
+      z-index: 2;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(116,255,184,0.22);
+      background: rgba(5,8,13,0.42);
+      color: rgba(170,255,211,0.58);
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      pointer-events: none;
+      text-shadow: 0 0 12px rgba(116,255,184,0.35);
+    }
+
+    .code-a {
+      left: 8%;
+      top: 18%;
+      animation: floatCodeA 8s ease-in-out infinite;
+    }
+
+    .code-b {
+      right: 8%;
+      bottom: 22%;
+      animation: floatCodeB 9s ease-in-out infinite;
+    }
+
+    .code-c {
+      left: 12%;
+      bottom: 13%;
+      animation: floatCodeC 10s ease-in-out infinite;
+    }
+
+    @keyframes bgMove {
+      from {
+        background-position: 0 0, 0 0;
+      }
+      to {
+        background-position: 160px 0, 0 90px;
+      }
+    }
+
+    @keyframes pulseOrb {
+      0%, 100% {
+        transform: scale(0.92);
+        opacity: 0.45;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 0.75;
+      }
+    }
+
+    @keyframes scanDown {
+      from {
+        transform: translateY(-120px);
+      }
+      to {
+        transform: translateY(760px);
+      }
+    }
+
+    @keyframes floatCodeA {
+      0%, 100% {
+        transform: translate(0, 0);
+      }
+      50% {
+        transform: translate(22px, 18px);
+      }
+    }
+
+    @keyframes floatCodeB {
+      0%, 100% {
+        transform: translate(0, 0);
+      }
+      50% {
+        transform: translate(-28px, -16px);
+      }
+    }
+
+    @keyframes floatCodeC {
+      0%, 100% {
+        transform: translate(0, 0);
+      }
+      50% {
+        transform: translate(18px, -22px);
+      }
+    }
+
+    @keyframes titleGlow {
+      0%, 100% {
+        text-shadow:
+          0 0 14px rgba(116,255,184,0.28),
+          0 0 28px rgba(116,255,184,0.28);
+      }
+      50% {
+        text-shadow:
+          0 0 20px rgba(116,255,184,0.56),
+          0 0 44px rgba(255,209,102,0.3);
+      }
+    }
+
+    @keyframes buttonShine {
+      from {
+        transform: translateX(-120%) skewX(-20deg);
+      }
+      to {
+        transform: translateX(220%) skewX(-20deg);
+      }
+    }
+
+    @keyframes cardPulse {
+      0%, 100% {
+        box-shadow: 0 18px 40px rgba(0,0,0,0.34);
+      }
+      50% {
+        box-shadow:
+          0 0 12px rgba(116,255,184,0.08),
+          0 18px 40px rgba(0,0,0,0.34);
+      }
+    }
+
+
+    .start-screen.hidden {
+      display: none;
+    }
+
+    .start-card {
+      width: min(650px, 86%);
+      text-align: center;
+      padding: 42px 38px;
+      border-radius: 30px;
+      border: 2px solid rgba(116,255,184,0.38);
+      background:
+        linear-gradient(135deg, rgba(116,255,184,0.12), rgba(255,209,102,0.08)),
+        rgba(8, 14, 20, 0.92);
+      box-shadow: 0 0 50px rgba(116,255,184,0.22);
+      position: relative;
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .start-card::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.08);
+      pointer-events: none;
+    }
+
+    .start-card .small {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      background: rgba(255,209,102,0.15);
+      border: 1px solid rgba(255,209,102,0.32);
+      color: #ffe3a2;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .start-card h2 {
+      font-size: 50px;
+      line-height: 1.05;
+      margin-bottom: 18px;
+      color: #ffffff;
+      animation: titleGlow 2.8s ease-in-out infinite;
+    }
+
+    .start-desc {
+      color: #ccebdd;
+      line-height: 1.65;
+      font-size: 15px;
+      margin-bottom: 26px;
+    }
+
+    .start-desc span {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .start-btn {
+      padding: 16px 38px;
+      border-radius: 18px;
+      color: #091015;
+      font-size: 17px;
+      font-weight: 1000;
+      background: linear-gradient(135deg, #74ffb8, #ffd166);
+      box-shadow: 0 12px 30px rgba(116,255,184,0.24);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .start-btn::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 34%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+      animation: buttonShine 2.3s ease-in-out infinite;
+    }
+
+    .start-btn:hover,
+    .reset-btn:hover,
+    .title-btn:hover,
+    .stage-btn:hover,
+    .submit-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .game-screen {
+      height: calc(100% - 68px);
+      display: grid;
+      grid-template-columns: 250px 1fr 330px;
+      min-height: 0;
+      background:
+        linear-gradient(90deg,
+          rgba(116,255,184,0.035) 0%,
+          rgba(255,255,255,0.01) 46%,
+          rgba(116,255,184,0.035) 100%
+        );
+    }
+
+    .left-panel,
+    .right-panel {
+      min-height: 0;
+      padding: 18px;
+      background: rgba(6, 12, 18, 0.68);
+      border-right: 2px solid rgba(116,255,184,0.18);
+      overflow: hidden;
+    }
+
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding-top: 18px;
+      padding-bottom: 18px;
+    }
+
+    .left-stack {
+      width: 100%;
+      max-width: 214px;
+      display: grid;
+      gap: 18px;
+      transform: none;
+      margin: 0 auto;
+    }
+
+    .right-panel {
+      border-right: none;
+      border-left: 2px solid rgba(116,255,184,0.18);
+      background:
+        radial-gradient(circle at 55% 38%, rgba(116,255,184,0.07), transparent 48%),
+        rgba(6, 12, 18, 0.68);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0;
+      color: #ffffff;
+      font-size: 18px;
+      letter-spacing: -0.2px;
+    }
+
+    .player-card {
+      width: 100%;
+      padding: 15px;
+      border-radius: 18px;
+      background: rgba(116,255,184,0.08);
+      border: 1px solid rgba(116,255,184,0.22);
+      margin-bottom: 0;
+    }
+
+    .player-avatar {
+      width: 62px;
+      height: 62px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #74ffb8, #2bd4ff);
+      color: #091015;
+      font-size: 31px;
+      margin-bottom: 12px;
+    }
+
+    .player-card h3 {
+      font-size: 17px;
+      margin-bottom: 7px;
+    }
+
+    .player-card p {
+      color: #bcebd4;
+      line-height: 1.5;
+      font-size: 12px;
+    }
+
+    .rule-list {
+      width: 100%;
+      display: grid;
+      gap: 8px;
+    }
+
+    .rule-item {
+      padding: 10px;
+      border-radius: 13px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #d7f9e8;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+
+
+
+    .hint-card {
+      width: 100%;
+      padding: 12px;
+      border-radius: 15px;
+      background:
+        linear-gradient(135deg, rgba(255,209,102,0.08), rgba(116,255,184,0.055)),
+        rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,209,102,0.22);
+      box-shadow: inset 0 0 16px rgba(255,209,102,0.035);
+    }
+
+    .hint-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .hint-head span {
+      color: #fff0a8;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .hint-btn {
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: #091015;
+      background: linear-gradient(135deg, #ffd166, #74ffb8);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .hint-text {
+      color: #f1ffe9;
+      font-size: 11.5px;
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+
+    .hint-text.closed {
+      display: none;
+    }
+
+
+    .player-card p,
+    .rule-item,
+    .stage p,
+    .mission-content .desc,
+    .question,
+    .hint-text {
+      word-break: keep-all;
+      overflow-wrap: normal;
+    }
+
+    .stage p {
+      min-height: 58px;
+    }
+
+    .question {
+      line-height: 1.7;
+    }
+
+    .map-area {
+      position: relative;
+      padding: 24px 22px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, #0b1418 0%, #081014 58%, #070c10 100%);
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .map-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .map-title h2 {
+      color: #ffffff;
+      font-size: 24px;
+    }
+
+    .map-title span {
+      color: #aeeed0;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      opacity: 0.9;
+    }
+
+    .road {
+      display: none;
+    }
+
+    .stage-row {
+      position: relative;
+      height: calc(100% - 52px);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      gap: 18px;
+      z-index: 2;
+      min-height: 0;
+      padding-top: 0;
+      transform: translateY(-18px);
+    }
+
+    .stage {
+      height: min(330px, 92%);
+      border-radius: 24px;
+      padding: 18px;
+      background: rgba(8, 15, 22, 0.88);
+      border: 2px solid rgba(116,255,184,0.23);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.34);
+      position: relative;
+      overflow: hidden;
+      animation: none;
+      transition: 0.22s ease;
+    }
+
+    .stage:hover {
+      transform: translateY(-6px);
+      border-color: rgba(116,255,184,0.55);
+    }
+
+    .stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, rgba(116,255,184,0.09), transparent 46%, rgba(255,209,102,0.08));
+      pointer-events: none;
+    }
+
+    .stage.locked {
+      opacity: 0.58;
+      filter: grayscale(0.32);
+    }
+
+    .stage.clear {
+      border-color: rgba(255,209,102,0.72);
+      box-shadow: 0 0 28px rgba(255,209,102,0.17);
+    }
+
+
+    .stage.active {
+      border-color: rgba(116,255,184,0.62);
+      box-shadow:
+        0 0 22px rgba(116,255,184,0.14),
+        0 18px 40px rgba(0,0,0,0.34);
+    }
+
+    .stage.active .stage-badge {
+      background: linear-gradient(135deg, #74ffb8, #b7ffe1);
+      box-shadow: 0 0 18px rgba(116,255,184,0.44);
+    }
+
+    .stage.active .stage-status {
+      color: #74ffb8;
+      text-shadow: 0 0 10px rgba(116,255,184,0.28);
+    }
+
+    .stage.active .stage-btn {
+      box-shadow: 0 0 18px rgba(116,255,184,0.18);
+    }
+
+
+    .stage-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stage-badge {
+      width: fit-content;
+      display: inline-block;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #74ffb8;
+      color: #091015;
+      font-size: 12px;
+      font-weight: 1000;
+      margin-bottom: 14px;
+    }
+
+    .stage h3 {
+      font-size: 21px;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .stage p {
+      color: #c9f4df;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
+    .stage-type {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 13px;
+    }
+
+    .tag {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e9fff3;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .stage-status {
+      margin-top: auto;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffd166;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .stage-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 14px;
+      color: #091015;
+      font-size: 12px;
+      font-weight: 1000;
+      background: linear-gradient(135deg, #74ffb8, #ffd166);
+    }
+
+    .stage-btn:disabled {
+      cursor: not-allowed;
+      color: #839088;
+      background: rgba(255,255,255,0.13);
+      transform: none;
+    }
+
+    .mission-box {
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 0;
+    }
+
+    .mission-content {
+      width: 100%;
+      min-height: 0;
+      padding: 18px;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(116,255,184,0.09), rgba(255,255,255,0.035)),
+        rgba(9, 18, 20, 0.78);
+      border: 1px solid rgba(116,255,184,0.22);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 22px rgba(116,255,184,0.06);
+    }
+
+    .mission-content > h3 {
+      font-size: 21px;
+      color: #ffffff;
+      margin-bottom: 10px;
+      flex: 0 0 auto;
+    }
+
+
+    .mission-card-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 13px;
+      border-bottom: 1px solid rgba(116,255,184,0.16);
+    }
+
+    .mission-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(116,255,184,0.12);
+      border: 1px solid rgba(116,255,184,0.2);
+      font-size: 19px;
+    }
+
+    .mission-card-head p {
+      margin-bottom: 3px;
+      color: #aef2c6;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+    }
+
+    .mission-card-head h3 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 21px;
+      letter-spacing: -0.3px;
+    }
+
+    .mission-content .desc {
+      color: #c9f4df;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 14px;
+      flex: 0 0 auto;
+    }
+
+    .quiz-area {
+      display: none;
+      flex: 0 0 auto;
+    }
+
+    .quiz-area.active {
+      display: block;
+    }
+
+    .question {
+      padding: 14px 15px;
+      border-radius: 15px;
+      background: rgba(8, 18, 20, 0.78);
+      border: 1px solid rgba(116,255,184,0.12);
+      line-height: 1.68;
+      color: #f6fff9;
+      font-weight: 700;
+      margin-bottom: 12px;
+      font-size: 13.2px;
+      letter-spacing: -0.25px;
+      word-break: keep-all;
+      box-shadow: none;
+    }
+
+    .option-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .option {
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: #f2fff8;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      line-height: 1.35;
+      font-size: 12px;
+    }
+
+
+    .option {
+      word-break: keep-all;
+      overflow-wrap: normal;
+    }
+
+    .option:hover {
+      background: rgba(116,255,184,0.12);
+    }
+
+    .option.selected {
+      outline: 2px solid #74ffb8;
+      background: rgba(116,255,184,0.16);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 13px;
+      color: #091015;
+      font-size: 12px;
+      font-weight: 1000;
+      background: linear-gradient(135deg, #ffd166, #74ffb8);
+    }
+
+    .message {
+      flex: 0 0 auto;
+      min-height: 42px;
+      margin-top: 12px;
+      padding: 11px;
+      border-radius: 13px;
+      background: rgba(0,0,0,0.18);
+      color: #c9f4df;
+      font-size: 12px;
+      line-height: 1.45;
+      overflow: hidden;
+    }
+
+    .message.success {
+      color: #74ffb8;
+      font-weight: 900;
+    }
+
+    .message.fail {
+      color: #ff9f9f;
+      font-weight: 900;
+    }
+
+    .wargame-placeholder {
+      display: none;
+      padding: 15px;
+      border-radius: 16px;
+      background: #05080d;
+      border: 1px solid rgba(116,255,184,0.22);
+      color: #9fffd0;
+      font-family: Consolas, monospace;
+      line-height: 1.7;
+      font-size: 12px;
+    }
+
+    .wargame-placeholder.active {
+      display: block;
+    }
+
+    .flag-input {
+      width: 100%;
+      margin-top: 13px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(116,255,184,0.25);
+      background: rgba(255,255,255,0.06);
+      color: #eafff4;
+      font-family: Consolas, monospace;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .flag-input:disabled {
+      opacity: 0.55;
+    }
+
+
+    .game-frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      background:
+        linear-gradient(90deg, transparent, rgba(116,255,184,0.12), transparent);
+      transform: translateX(-120%);
+      animation: frameLight 5.5s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .top-hud,
+    .game-screen {
+      position: relative;
+      z-index: 2;
+    }
+
+    .top-hud::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 34%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #74ffb8, #ffd166, transparent);
+      animation: hudLine 3.2s linear infinite;
+    }
+
+    .map-area::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(116,255,184,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(116,255,184,0.02) 1px, transparent 1px);
+      background-size: 42px 42px;
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .map-area::after {
+      display: none;
+    }
+
+    .map-title,
+    .stage-row {
+      position: relative;
+      z-index: 3;
+    }
+
+    .map-title h2 {
+      text-shadow:
+        0 0 12px rgba(116,255,184,0.25),
+        0 0 22px rgba(116,255,184,0.18);
+    }
+
+    .map-title span {
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(116,255,184,0.22);
+      background: rgba(116,255,184,0.07);
+      box-shadow: 0 0 18px rgba(116,255,184,0.08);
+    }
+
+    .map-glow,
+    .glow-one,
+    .glow-two {
+      display: none;
+    }
+
+    .map-code {
+      display: none;
+    }
+
+    .stage {
+      backdrop-filter: blur(8px);
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -80%;
+      width: 45%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.11),
+        transparent
+      );
+      transform: skewX(-18deg);
+      animation: stageShine 4.5s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .stage:nth-child(2)::before {
+      animation-delay: 0.7s;
+    }
+
+    .stage:nth-child(3)::before {
+      animation-delay: 1.4s;
+    }
+
+    .stage-badge {
+      box-shadow: 0 0 16px rgba(116,255,184,0.35);
+      animation: badgePulse 2.2s ease-in-out infinite;
+    }
+
+    .stage-status {
+      text-shadow: 0 0 10px rgba(255,209,102,0.25);
+    }
+
+    .stage-btn,
+    .submit-btn,
+    .reset-btn,
+    .title-btn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stage-btn::after,
+    .submit-btn::after,
+    .reset-btn::after,
+    .title-btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent);
+      transform: translateX(-130%) skewX(-18deg);
+      animation: buttonSweep 3.1s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .mission-content {
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        inset 0 0 24px rgba(116,255,184,0.05),
+        0 0 18px rgba(116,255,184,0.06);
+    }
+
+    .mission-content::before {
+      display: none;
+    }
+
+    .mission-status-bar {
+      display: none;
+    }
+
+    .mission-content h3,
+    .mission-content .desc,
+    .quiz-area,
+    .wargame-placeholder,
+    .message {
+      position: relative;
+      z-index: 2;
+    }
+
+    .question {
+      box-shadow: inset 0 0 18px rgba(116,255,184,0.04);
+    }
+
+    .option {
+      transition: 0.2s ease;
+    }
+
+    .option:hover {
+      transform: translateX(4px);
+      border-color: rgba(116,255,184,0.35);
+    }
+
+    @keyframes frameLight {
+      0%, 55%, 100% {
+        transform: translateX(-120%);
+        opacity: 0;
+      }
+      68% {
+        opacity: 1;
+      }
+      88% {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes hudLine {
+      from {
+        transform: translateX(-120%);
+      }
+      to {
+        transform: translateX(340%);
+      }
+    }
+
+    @keyframes glowFloatOne {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+      }
+      50% {
+        transform: translate(34px, 16px) scale(1.08);
+      }
+    }
+
+    @keyframes glowFloatTwo {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+      }
+      50% {
+        transform: translate(-28px, -22px) scale(1.1);
+      }
+    }
+
+    @keyframes stageShine {
+      0%, 45%, 100% {
+        left: -80%;
+        opacity: 0;
+      }
+      58% {
+        opacity: 1;
+      }
+      82% {
+        left: 135%;
+        opacity: 0;
+      }
+    }
+
+    @keyframes badgePulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes buttonSweep {
+      0%, 55%, 100% {
+        transform: translateX(-130%) skewX(-18deg);
+      }
+      76% {
+        transform: translateX(130%) skewX(-18deg);
+      }
+    }
+
+    @keyframes statusBlink {
+      0%, 100% {
+        opacity: 0.35;
+        transform: scale(0.85);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+
+
+    .start-screen {
+      position: absolute !important;
+      inset: 0 !important;
+      z-index: 20 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .start-screen.hidden {
+      display: none !important;
+    }
+
+
+    @media (max-height: 720px) {
+      .page {
+        padding: 10px;
+      }
+
+      .game-frame {
+        width: min(1200px, calc((100vh - 20px) * 16 / 9), calc(100vw - 20px));
+        height: min(675px, calc(100vh - 20px), calc((100vw - 20px) * 9 / 16));
+      }
+
+      .top-hud {
+        height: 62px;
+        padding: 0 20px;
+      }
+
+      .game-title h1 {
+        font-size: 24px;
+      }
+
+      .title-text {
+        gap: 12px;
+      }
+
+      .game-title p {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+
+      .game-icon {
+        width: 38px;
+        height: 38px;
+      }
+
+      .game-screen {
+        height: calc(100% - 62px);
+        grid-template-columns: 230px 1fr 310px;
+      }
+
+      .left-panel,
+      .right-panel {
+        padding: 15px;
+      }
+
+      .left-panel {
+        display: flex;
+        justify-content: center;
+        padding-top: 15px;
+        padding-bottom: 15px;
+      }
+
+      .left-stack {
+        gap: 16px;
+        transform: none;
+        margin: 0 auto;
+      }
+
+      .mission-box {
+        padding-top: 0;
+      }
+
+      .map-area {
+        padding: 20px 18px;
+      }
+
+      .stage {
+        height: min(300px, 92%);
+        padding: 15px;
+      }
+
+      .stage-row {
+        transform: translateY(-10px);
+      }
+
+      .stage h3 {
+        font-size: 19px;
+      }
+
+      .stage p,
+      .mission-content .desc,
+      .rule-item,
+      .player-card p {
+        font-size: 11.5px;
+      }
+
+      .question {
+        font-size: 12.2px;
+        line-height: 1.62;
+      }
+
+      .player-avatar {
+        width: 54px;
+        height: 54px;
+        font-size: 27px;
+      }
+
+      .mission-content {
+        padding: 15px;
+      }
+
+      .option {
+        padding: 9px 10px;
+      }
+
+      .submit-btn,
+      .stage-btn {
+        padding: 11px;
+      }
+    }
+
+    @media (max-width: 950px) {
+      body {
+        overflow: auto;
+      }
+
+      .page {
+        height: auto;
+        min-height: 100vh;
+        align-items: flex-start;
+      }
+
+      .game-frame {
+        width: calc(100vw - 24px);
+        height: auto;
+        min-height: 680px;
+      }
+
+      .game-screen {
+        height: auto;
+        grid-template-columns: 1fr;
+      }
+
+      .left-panel,
+      .right-panel {
+        border: none;
+        border-bottom: 2px solid rgba(116,255,184,0.18);
+      }
+
+      .left-panel {
+        display: block;
+        padding-top: 22px;
+      }
+
+      .left-stack {
+        gap: 12px;
+        transform: none;
+        margin: 0 auto;
+      }
+
+      .mission-box {
+        padding-top: 0;
+      }
+
+      .stage-row {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .stage {
+        height: auto;
+      }
+
+      .road {
+        display: none;
+      }
+
+      .top-hud {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .title-text {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 7px;
+      }
+
+      .game-title p {
+        white-space: normal;
+      }
+
+      .hud-right {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .mission-content {
+        min-height: 420px;
+      }
+
+      .start-card h2 {
+        font-size: 40px;
+      }
+
+      .start-desc span {
+        white-space: normal;
+      }
+
+      .floating-code {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <div class="outer-code outer-code-1">ACCESS · WEB · QUEST · FLAG</div>
+    <div class="outer-code outer-code-2">XSS · SQLI · CSRF · WARGAME</div>
+    <div class="outer-code outer-code-3">&lt;/&gt; SYSTEM READY · START GAME</div>
+                        <section class="game-frame">
+      <div class="start-screen" id="startScreen">
+        <div class="scan-line"></div>
+        <div class="floating-code code-a">0101  XSS  SQL  FLAG  CSRF  0101</div>
+        <div class="floating-code code-b">&lt;script&gt; quest.clear(); &lt;/script&gt;</div>
+        <div class="floating-code code-c">ACCESS CHECK · LEVEL UNLOCKED · FLAG</div>
+        <div class="start-card">
+          <span class="small">WEB SECURITY ARCADE</span>
+          <h2>Web Hacking Game</h2>
+          <p class="start-desc">
+            <span>개념 문제와 워게임을 단계별로 해결하는 웹해킹 게임입니다.</span>
+            <span>START GAME을 누르면 LV.1부터 도전할 수 있습니다.</span>
+          </p>
+          <button class="start-btn" onclick="startGame()">START GAME</button>
+        </div>
+      </div>
+
+      <header class="top-hud">
+        <div class="game-title">
+          <div class="game-icon">
+            <span class="shield-mark"></span>
+          </div>
+          <div class="title-text">
+            <h1>Web Hacking Game</h1>
+            <p>LV.1 Concept Quiz → LV.2 Wargame → LV.3 Wargame</p>
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <div class="level-box" id="currentHud">CURRENT : LV.1</div>
+          <div class="coin-box" id="clearHud">CLEAR : 0 / 3</div>
+          <button class="title-btn" onclick="goTitle()">TITLE</button>
+          <button class="reset-btn" onclick="resetGame()">RESET</button>
+        </div>
+      </header>
+
+      <section class="game-screen">
+        <aside class="left-panel">
+          <div class="left-stack">
+            <div class="player-card">
+              <div class="player-avatar">🕹️</div>
+              <h3>PLAYER</h3>
+              <p>
+                LV.1을 클리어하면<br />
+                LV.2와 LV.3 워게임이 열립니다.
+              </p>
+            </div>
+
+            <h2 class="panel-title">🎮 진행 방식</h2>
+            <div class="rule-list">
+              <div class="rule-item">1. START GAME으로 시작합니다.</div>
+              <div class="rule-item">2. 클리어하면 다음 레벨이 열립니다.</div>
+            </div>
+
+            <div class="hint-card" id="hintCard">
+              <div class="hint-head">
+                <span>💡 힌트</span>
+                <button class="hint-btn" id="hintBtn" onclick="toggleHint()">힌트 보기</button>
+              </div>
+              <p class="hint-text closed" id="hintText">
+                현재 레벨에 맞는 힌트가 표시됩니다.
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        <section class="map-area">
+          <div class="map-title">
+            <h2>Stage Road</h2>
+            <span>레벨을 클리어하면 다음 단계가 열립니다</span>
+          </div>
+
+          <div class="stage-row">
+            <article class="stage" id="stage1">
+              <div class="stage-content">
+                <span class="stage-badge">LV.1</span>
+                <h3>개념 문제</h3>
+                <p>
+                  웹해킹 기본 개념을<br />
+                  확인합니다.
+                </p>
+                <div class="stage-type">
+                  <span class="tag">Concept</span>
+                  <span class="tag">Quiz</span>
+                </div>
+                <div class="stage-status" id="status1">● OPEN</div>
+                <button class="stage-btn" id="stageBtn1" onclick="selectStage(1)">PLAY LV.1</button>
+              </div>
+            </article>
+
+            <article class="stage locked" id="stage2">
+              <div class="stage-content">
+                <span class="stage-badge">LV.2</span>
+                <h3>워게임</h3>
+                <p>
+                  취약점 문제를<br />
+                  해결하는 스테이지입니다.
+                </p>
+                <div class="stage-type">
+                  <span class="tag">Wargame</span>
+                  <span class="tag">FLAG</span>
+                </div>
+                <div class="stage-status" id="status2">● LOCKED</div>
+                <button class="stage-btn" id="stageBtn2" onclick="selectStage(2)" disabled>LOCKED</button>
+              </div>
+            </article>
+
+            <article class="stage locked" id="stage3">
+              <div class="stage-content">
+                <span class="stage-badge">LV.3</span>
+                <h3>워게임</h3>
+                <p>
+                  최종 워게임에<br />
+                  도전하는 스테이지입니다.
+                </p>
+                <div class="stage-type">
+                  <span class="tag">Wargame</span>
+                  <span class="tag">Boss Stage</span>
+                </div>
+                <div class="stage-status" id="status3">● LOCKED</div>
+                <button class="stage-btn" id="stageBtn3" onclick="selectStage(3)" disabled>LOCKED</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <aside class="right-panel">
+          <div class="mission-box">
+            <div class="mission-content">
+              <div class="mission-card-head">
+                <span class="mission-icon">📝</span>
+                <div>
+                  <p>문제 풀이</p>
+                  <h3 id="missionTitle">LV.1 개념 문제</h3>
+                </div>
+              </div>
+              <p class="desc" id="missionDesc">
+                객관식 문제를 풀면 LV.1이 클리어되고, LV.2 워게임 스테이지가 열립니다.
+              </p>
+
+              <div class="quiz-area active" id="quizArea">
+                <div class="question">
+                  사용자 입력을 검증 없이 출력할 때 발생할 수 있는 취약점은?
+                </div>
+
+                <div class="option-list" id="optionList">
+                  <button class="option" onclick="chooseOption(0, this)">XSS</button>
+                  <button class="option" onclick="chooseOption(1, this)">CSRF</button>
+                  <button class="option" onclick="chooseOption(2, this)">SQL Injection</button>
+                  <button class="option" onclick="chooseOption(3, this)">Command Injection</button>
+                </div>
+
+                <button class="submit-btn" onclick="submitQuiz()">SUBMIT ANSWER</button>
+              </div>
+
+              <div class="wargame-placeholder" id="wargameArea">
+                &gt; WARGAME MODE<br />
+                &gt; Challenge status : 준비 중<br />
+                &gt; 이 영역에 문제 설명, 힌트, FLAG 입력 기능을 넣으면 됩니다.<br />
+                <input class="flag-input" type="text" placeholder="FLAG 입력 영역 - 추후 활성화" disabled />
+              </div>
+
+              <div class="message" id="message">
+                LV.1 문제를 먼저 풀어주세요.
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    let currentStage = 1;
+    let selectedAnswer = null;
+
+
+    const hints = {
+      1: "사용자의 입력값이 화면에 출력될 때, 브라우저가 그 값을 어떻게 해석하는지 생각해보세요.",
+      2: "화면에 보이는 내용뿐 아니라 URL, 입력창, 개발자 도구의 단서도 살펴보세요.",
+      3: "요청이 서버에서 어떻게 처리되는지, 권한과 세션 흐름을 중심으로 살펴보세요."
+    };
+
+    let hintOpen = false;
+
+    function updateHint(stage) {
+      const hintText = document.getElementById("hintText");
+      const hintBtn = document.getElementById("hintBtn");
+
+      if (!hintText || !hintBtn) return;
+
+      hintText.textContent = hints[stage] || hints[1];
+      hintText.classList.add("closed");
+      hintBtn.textContent = "힌트 보기";
+      hintOpen = false;
+    }
+
+    function toggleHint() {
+      const hintText = document.getElementById("hintText");
+      const hintBtn = document.getElementById("hintBtn");
+
+      if (!hintText || !hintBtn) return;
+
+      hintOpen = !hintOpen;
+
+      if (hintOpen) {
+        hintText.classList.remove("closed");
+        hintBtn.textContent = "힌트 닫기";
+      } else {
+        hintText.classList.add("closed");
+        hintBtn.textContent = "힌트 보기";
+      }
+    }
+
+
+    const savedProgress = localStorage.getItem("webHackingGameProgressFixed");
+    let progress = savedProgress ? JSON.parse(savedProgress) : {
+      1: false,
+      2: false,
+      3: false
+    };
+
+    function startGame() {
+      document.getElementById("startScreen").classList.add("hidden");
+      selectStage(1);
+      updateUI();
+    }
+
+    function goTitle() {
+      document.getElementById("startScreen").classList.remove("hidden");
+    }
+
+    function saveProgress() {
+      localStorage.setItem("webHackingGameProgressFixed", JSON.stringify(progress));
+    }
+
+    function isUnlocked(stage) {
+      if (stage === 1) return true;
+      return progress[stage - 1];
+    }
+
+    function selectStage(stage) {
+      if (!isUnlocked(stage)) return;
+
+      currentStage = stage;
+      selectedAnswer = null;
+      updateHint(stage);
+
+      document.querySelectorAll(".option").forEach((option) => {
+        option.classList.remove("selected");
+      });
+
+      const quizArea = document.getElementById("quizArea");
+      const wargameArea = document.getElementById("wargameArea");
+      const message = document.getElementById("message");
+
+      document.getElementById("currentHud").textContent = `CURRENT : LV.${stage}`;
+
+      if (stage === 1) {
+        document.getElementById("missionTitle").textContent = "LV.1 개념 문제";
+        document.getElementById("missionDesc").textContent =
+          "정답을 맞히면 LV.2 워게임이 열립니다.";
+        quizArea.classList.add("active");
+        wargameArea.classList.remove("active");
+        message.className = "message";
+        message.textContent = progress[1]
+          ? "LV.1은 이미 클리어했습니다. 다시 풀어볼 수도 있습니다."
+          : "LV.1 문제를 먼저 풀어주세요.";
+      }
+
+      if (stage === 2) {
+        document.getElementById("missionTitle").textContent = "LV.2 워게임";
+        document.getElementById("missionDesc").textContent =
+          "이곳은 LV.2 워게임 문제를 넣을 영역입니다. 현재는 틀만 만들어둔 상태입니다.";
+        quizArea.classList.remove("active");
+        wargameArea.classList.add("active");
+        message.className = "message";
+        message.textContent = "LV.2에는 나중에 실제 워게임 문제와 FLAG 검증 기능을 추가하면 됩니다.";
+      }
+
+      if (stage === 3) {
+        document.getElementById("missionTitle").textContent = "LV.3 워게임";
+        document.getElementById("missionDesc").textContent =
+          "이곳은 LV.3 고난도 워게임 문제를 넣을 영역입니다. 현재는 틀만 만들어둔 상태입니다.";
+        quizArea.classList.remove("active");
+        wargameArea.classList.add("active");
+        message.className = "message";
+        message.textContent = "LV.3에는 더 어려운 워게임 문제를 넣는 방식으로 확장하면 됩니다.";
+      }
+
+      updateUI();
+    }
+
+    function chooseOption(index, button) {
+      selectedAnswer = index;
+
+      document.querySelectorAll(".option").forEach((option) => {
+        option.classList.remove("selected");
+      });
+
+      button.classList.add("selected");
+    }
+
+    function submitQuiz() {
+      const message = document.getElementById("message");
+
+      if (currentStage !== 1) {
+        message.className = "message fail";
+        message.textContent = "현재 선택된 스테이지는 개념 문제가 아닙니다.";
+        return;
+      }
+
+      if (selectedAnswer === null) {
+        message.className = "message fail";
+        message.textContent = "답을 먼저 선택해야 합니다.";
+        return;
+      }
+
+      if (selectedAnswer === 0) {
+        progress[1] = true;
+        saveProgress();
+        updateUI();
+
+        message.className = "message success";
+        message.textContent = "정답입니다. LV.1을 클리어했고, LV.2 워게임이 해금되었습니다.";
+      } else {
+        message.className = "message fail";
+        message.textContent = "오답입니다. 사용자 입력값이 화면에 그대로 출력될 때 생기는 취약점을 다시 생각해보세요.";
+      }
+    }
+
+    function updateUI() {
+      let clearCount = 0;
+
+      for (let i = 1; i <= 3; i++) {
+        if (progress[i]) clearCount++;
+
+        const stage = document.getElementById(`stage${i}`);
+        const status = document.getElementById(`status${i}`);
+        const button = document.getElementById(`stageBtn${i}`);
+
+        if (isUnlocked(i)) {
+          stage.classList.remove("locked");
+          button.disabled = false;
+          button.textContent = progress[i] ? `REPLAY LV.${i}` : `PLAY LV.${i}`;
+          status.textContent = progress[i] ? "● CLEAR" : "● OPEN";
+        } else {
+          stage.classList.add("locked");
+          button.disabled = true;
+          button.textContent = "LOCKED";
+          status.textContent = "● LOCKED";
+        }
+
+        if (progress[i]) {
+          stage.classList.add("clear");
+        } else {
+          stage.classList.remove("clear");
+        }
+
+        if (isUnlocked(i) && !progress[i]) {
+          stage.classList.add("active");
+        } else {
+          stage.classList.remove("active");
+        }
+      }
+
+      document.getElementById("clearHud").textContent = `CLEAR : ${clearCount} / 3`;
+    }
+
+    function resetGame() {
+      progress = {
+        1: false,
+        2: false,
+        3: false
+      };
+
+      selectedAnswer = null;
+      saveProgress();
+      updateUI();
+      selectStage(1);
+      updateHint(1);
+
+      document.querySelectorAll(".option").forEach((option) => {
+        option.classList.remove("selected");
+      });
+
+      const message = document.getElementById("message");
+      message.className = "message";
+      message.textContent = "게임 진행도가 초기화되었습니다. LV.1부터 다시 시작하세요.";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("startScreen").classList.remove("hidden");
+      updateHint(1);
+      updateUI();
+    });
+
+    updateUI();
+  </script>
+</body>
+</html>
